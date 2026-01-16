@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL: http://localhost:8001
+
+  backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.api
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./database.sqlite:/app/database.sqlite
+    environment:
+      - DB_HOST: localhost
+      - DB_NAME: master_shirt_shop
+      - DB_USER: root
+      - DB_PASS: ""
+      - JWT_SECRET: MASTER_NODE_SECURE_99_ALPHA_V3
+      - APP_ENV: production
+      - APP_DEBUG: "false"
+      - APP_URL: http://localhost:8001

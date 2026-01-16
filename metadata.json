@@ -1,0 +1,7 @@
+{
+  "name": "Master Shirt Shop - Global Edition",
+  "description": "A conversion-optimized, multi-language e-commerce platform for high-quality apparel, featuring AI-powered search, multi-currency support, and mobile-first design.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../components"
+		},
+		{
+			"path": "../database"
+		},
+		{
+			"path": "../node_modules"
+		},
+		{
+			"path": "../services"
+		}
+	]
+}
