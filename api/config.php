@@ -15,7 +15,7 @@ function loadEnv($path) {
     }
 }
 
-loadEnv(__DIR__ . '/../../.env');
+loadEnv(__DIR__ . '/.env');
 
 // Database Configuration
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
@@ -35,16 +35,9 @@ define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost:8000');
 // Database Connection Function
 function getDB() {
     try {
-        // Try SQLite first (fallback)
-        $sqlitePath = __DIR__ . '/../backend/database.sqlite';
-        if (file_exists($sqlitePath)) {
-            $pdo = new PDO('sqlite:' . $sqlitePath);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $pdo;
-        }
-        
-        // Fallback to MySQL
-        $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8", DB_USER, DB_PASS);
+        // Use SQLite directly
+        $sqlitePath = __DIR__ . '/database.sqlite';
+        $pdo = new PDO('sqlite:' . $sqlitePath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     } catch (PDOException $e) {
