@@ -18,31 +18,34 @@ function loadEnv($path) {
 loadEnv(__DIR__ . '/.env');
 
 // Neon PostgreSQL Configuration
-define('DB_HOST', $_ENV['DB_HOST'] ?? 'ep-young-voice-ah2904qr-pooler.c-3.us-east-1.aws.neon.tech');
-define('DB_NAME', $_ENV['DB_NAME'] ?? 'neondb');
-define('DB_USER', $_ENV['DB_USER'] ?? 'neondb_owner');
-define('DB_PASS', $_ENV['DB_PASS'] ?? 'npg_oaUnfsOMG9e7@ep-young-voice-ah2904qr-pooler.c-3.us-east-1.aws.neon.tech');
-define('DB_PORT', $_ENV['DB_PORT'] ?? '5432');
-define('DB_SSL', $_ENV['DB_SSL'] ?? 'require');
+define('DB_HOST', 'ep-young-voice-ah2904qr-pooler.c-3.us-east-1.aws.neon.tech');
+define('DB_NAME', 'neondb');
+define('DB_USER', 'neondb_owner');
+define('DB_PASS', 'npg_oaUnfsOMG9e7');
+define('DB_PORT', '5432');
+define('DB_SSL', 'require');
 
 // Security Configuration
-define('JWT_SECRET', $_ENV['JWT_SECRET'] ?? 'MASTER_NODE_SECURE_99_ALPHA_V3');
+define('JWT_SECRET', 'your_super_secret_jwt_key_change_this_in_production');
 define('JWT_EXPIRY', $_ENV['JWT_EXPIRY'] ?? 86400);
 
 // Server Configuration
-define('APP_ENV', $_ENV['APP_ENV'] ?? 'development');
-define('APP_DEBUG', $_ENV['APP_DEBUG'] ?? 'true');
-define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost:8000');
+define('APP_ENV', 'production');
+define('APP_DEBUG', false);
+define('APP_URL', 'https://your-backend-url.railway.app');
 
 // Database Connection Function
 function getDB() {
     try {
-        $dsn = "pgsql:host=".DB_HOST.";port=".DB_PORT.";dbname=".DB_NAME.";sslmode=".DB_SSL;
-        $pdo = new PDO($dsn, DB_USER, DB_PASS);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=" . DB_SSL;
+        $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false
+        ]);
         return $pdo;
     } catch (PDOException $e) {
-        error_log("Database connection error: " . $e->getMessage());
+        error_log("Database connection failed: " . $e->getMessage());
         return null;
     }
 }
