@@ -21,9 +21,10 @@ CREATE TABLE IF NOT EXISTS categories (
 -- Products Table
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
+    name_json JSONB NOT NULL,
+    description_json JSONB NOT NULL,
     price DECIMAL(10,2) NOT NULL,
+    typical_price DECIMAL(10,2),
     category_id INTEGER REFERENCES categories(id),
     brand VARCHAR(100),
     stock INTEGER DEFAULT 0,
@@ -69,7 +70,7 @@ INSERT INTO users (name, email, password, role) VALUES
 ('System Admin', 'admin@master.com', '$2y$12$L/okWbSo1DVZq1TBIdlPXOrBXFIEGIYXJyvDn213LN.O6ZT/2cPiW', 'admin');
 
 -- Insert Sample Products
-INSERT INTO products (name, description, price, category_id, brand, stock, image_url, material, is_active) VALUES 
-('Classic T-Shirt', 'Comfortable cotton t-shirt perfect for everyday wear', 19.99, 1, 'MasterBrand', 100, 'https://via.placeholder.com/300', '100% Cotton', TRUE),
-('Premium Polo', 'High-quality polo shirt with premium fabric', 39.99, 1, 'MasterBrand', 50, 'https://via.placeholder.com/300', 'Cotton Blend', TRUE),
-('Casual Shirt', 'Relaxed fit casual shirt for weekend outings', 29.99, 2, 'MasterBrand', 75, 'https://via.placeholder.com/300', 'Polyester', TRUE);
+INSERT INTO products (name_json, description_json, price, typical_price, category_id, brand, stock, image_url, material, is_active) VALUES 
+('{"en": "Classic T-Shirt", "kh": "អាវខ្លីសិច"}', '{"en": "Comfortable cotton t-shirt", "kh": "អាវខ្លីសិចស្រួល"}', 19.99, 29.99, 1, 'MasterBrand', 100, 'https://via.placeholder.com/300', '100% Cotton', TRUE),
+('{"en": "Premium Polo", "kh": "អាវប៉ូឡូពិសខេស"}', '{"en": "High-quality polo shirt", "kh": "អាវប៉ូឡូពិសខុណភាពខ្ពស់"}', 39.99, 49.99, 1, 'MasterBrand', 50, 'https://via.placeholder.com/300', 'Cotton Blend', TRUE),
+('{"en": "Casual Shirt", "kh": "អាវសម្រាប់ប្រចនំថ្ងៃ"}', '{"en": "Relaxed fit casual shirt", "kh": "អាវសម្រាប់ពេលប្រចនំថ្ងៃ"}', 29.99, 39.99, 2, 'MasterBrand', 75, 'https://via.placeholder.com/300', 'Polyester', TRUE);

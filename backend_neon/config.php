@@ -18,10 +18,10 @@ function loadEnv($path) {
 loadEnv(__DIR__ . '/.env');
 
 // Neon PostgreSQL Configuration
-define('DB_HOST', 'ep-young-voice-ah2904qr-pooler.c-3.us-east-1.aws.neon.tech');
+define('DB_HOST', 'ep-bitter-hill-ahicq02h-pooler.c-3.us-east-1.aws.neon.tech');
 define('DB_NAME', 'neondb');
 define('DB_USER', 'neondb_owner');
-define('DB_PASS', 'npg_oaUnfsOMG9e7');
+define('DB_PASS', 'npg_xUWu8qKeaSL4');
 define('DB_PORT', '5432');
 define('DB_SSL', 'require');
 
