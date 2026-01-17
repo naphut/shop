@@ -69,26 +69,36 @@ const App: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
+            console.log('Starting app initialization...');
             
             // 1. Sync User Session
             const token = localStorage.getItem('ms-token');
             if (token) {
                 try {
+                    console.log('Found token, validating...');
                     const res = await apiService.getMe();
                     setCurrentUser(res.data);
                     if (res.data.role === 'admin') setIsAdminLoggedIn(true);
+                    console.log('User session restored:', res.data);
                 } catch (err) {
+                    console.log('Token validation failed:', err);
                     localStorage.removeItem('ms-token');
                 }
             }
 
             // 2. Fetch Products
             try {
+                console.log('Fetching products...');
                 const res = await apiService.getProducts();
-                console.log('API Response:', res.data);
+                console.log('Products API response:', res);
                 
                 // Handle the response structure from backend
                 const productsData = res.data.data || res.data;
+                console.log('Products data:', productsData);
+                
+                if (!Array.isArray(productsData)) {
+                    throw new Error('Products data is not an array');
+                }
                 
                 // In a real DB, name_json is a string that needs parsing
                 const formatted = productsData.map((p: any) => {
@@ -121,6 +131,7 @@ const App: React.FC = () => {
             setError("Failed to initialize application.");
         } finally {
             setLoading(false);
+            console.log('App initialization completed');
         }
     };
     initApp();
