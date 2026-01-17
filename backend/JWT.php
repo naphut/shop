@@ -1,4 +1,3 @@
-cat > JWT.php << 'EOF'
 <?php
 class JWT {
     public static function encode($payload, $secret) {
@@ -31,4 +30,4 @@ class JWT {
         return (object)$payload;
     }
 }
-EOF
+?>

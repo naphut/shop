@@ -1,4 +1,3 @@
-cat > config.php << 'EOF'
 <?php
 // Load environment variables
 function loadEnv($path) {
@@ -41,4 +40,3 @@ define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
 define('DB_NAME', $_ENV['DB_NAME'] ?? 'master_shirt_shop');
 define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
-EOF
