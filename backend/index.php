@@ -212,7 +212,145 @@ try {
             }
             break;
 
+        case 'user/orders':
+            $auth = verifyAuth();
+            if ($method === 'GET') {
+                $stmt = $db->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
+                $stmt->execute([$auth->id]);
+                $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                sendResponse([
+                    "success" => true,
+                    "data" => $orders
+                ]);
+            } else if ($method === 'POST') {
+                $stmt = $db->prepare("INSERT INTO orders (user_id, total_amount, status, items, shipping_address) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([
+                    $auth->id,
+                    $input['total_amount'],
+                    'pending',
+                    json_encode($input['items']),
+                    $input['shipping_address']
+                ]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Order placed successfully"
+                ]);
+            } else {
+                sendError("Method not allowed", 405);
+            }
+            break;
+
         // --- ADMIN ENDPOINTS ---
+        case 'admin/orders':
+            $user = verifyAdmin();
+            if ($method === 'GET') {
+                $stmt = $db->query("SELECT o.*, u.name as customer_name, u.email as customer_email FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC");
+                $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                sendResponse([
+                    "success" => true,
+                    "data" => $orders
+                ]);
+            } else if ($method === 'PUT') {
+                $stmt = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
+                $stmt->execute([$input['status'], $input['id']]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Order status updated successfully"
+                ]);
+            } else {
+                sendError("Method not allowed", 405);
+            }
+            break;
+
+        case 'admin/products':
+            $user = verifyAdmin();
+            if ($method === 'GET') {
+                $stmt = $db->query("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.id DESC");
+                $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                sendResponse([
+                    "success" => true,
+                    "data" => $products
+                ]);
+            } else if ($method === 'POST') {
+                $stmt = $db->prepare("INSERT INTO products (name_json, description_json, price, category_id, brand, stock, image_url, material) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([
+                    json_encode($input['name']),
+                    json_encode($input['description']),
+                    $input['price'],
+                    $input['category_id'],
+                    $input['brand'],
+                    $input['stock'],
+                    $input['image_url'],
+                    $input['material']
+                ]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Product created successfully"
+                ]);
+            } else if ($method === 'PUT') {
+                $stmt = $db->prepare("UPDATE products SET name_json = ?, description_json = ?, price = ?, category_id = ?, brand = ?, stock = ?, image_url = ?, material = ? WHERE id = ?");
+                $stmt->execute([
+                    json_encode($input['name']),
+                    json_encode($input['description']),
+                    $input['price'],
+                    $input['category_id'],
+                    $input['brand'],
+                    $input['stock'],
+                    $input['image_url'],
+                    $input['material'],
+                    $input['id']
+                ]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Product updated successfully"
+                ]);
+            } else if ($method === 'DELETE') {
+                $stmt = $db->prepare("DELETE FROM products WHERE id = ?");
+                $stmt->execute([$input['id']]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Product deleted successfully"
+                ]);
+            } else {
+                sendError("Method not allowed", 405);
+            }
+            break;
+
+        case 'admin/categories':
+            $user = verifyAdmin();
+            if ($method === 'GET') {
+                $stmt = $db->query("SELECT * FROM categories ORDER BY name");
+                $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                sendResponse([
+                    "success" => true,
+                    "data" => $categories
+                ]);
+            } else if ($method === 'POST') {
+                $stmt = $db->prepare("INSERT INTO categories (name) VALUES (?)");
+                $stmt->execute([$input['name']]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Category created successfully"
+                ]);
+            } else if ($method === 'PUT') {
+                $stmt = $db->prepare("UPDATE categories SET name = ? WHERE id = ?");
+                $stmt->execute([$input['name'], $input['id']]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Category updated successfully"
+                ]);
+            } else if ($method === 'DELETE') {
+                $stmt = $db->prepare("DELETE FROM categories WHERE id = ?");
+                $stmt->execute([$input['id']]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Category deleted successfully"
+                ]);
+            } else {
+                sendError("Method not allowed", 405);
+            }
+            break;
+
         case 'admin/dashboard':
             $user = verifyAdmin();
             $revenue = $db->query("SELECT SUM(total_amount) as total FROM orders WHERE status = 'completed'")->fetch();
