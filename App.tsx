@@ -79,16 +79,35 @@ const App: React.FC = () => {
         // 2. Fetch Products
         try {
             const res = await apiService.getProducts();
+            console.log('API Response:', res.data);
+            
+            // Handle the response structure from backend
+            const productsData = res.data.data || res.data;
+            
             // In a real DB, name_json is a string that needs parsing
-            const formatted = res.data.map((p: any) => ({
-                ...p,
-                name: typeof p.name_json === 'string' ? JSON.parse(p.name_json) : p.name_json,
-                description: typeof p.description_json === 'string' ? JSON.parse(p.description_json) : p.description_json,
-                price: parseFloat(p.price)
-            }));
+            const formatted = productsData.map((p: any) => {
+                try {
+                    return {
+                        ...p,
+                        name: typeof p.name_json === 'string' ? JSON.parse(p.name_json) : p.name_json,
+                        description: typeof p.description_json === 'string' ? JSON.parse(p.description_json) : p.description_json,
+                        price: parseFloat(p.price)
+                    };
+                } catch (parseErr) {
+                    console.error('Error parsing product:', p.id, parseErr);
+                    return {
+                        ...p,
+                        name: { en: p.name || 'Product', kh: '' },
+                        description: { en: p.description || '', kh: '' },
+                        price: parseFloat(p.price) || 0
+                    };
+                }
+            });
             setProducts(formatted);
+            console.log('Products loaded successfully:', formatted.length);
         } catch (err) {
-            console.error("Catalog Sync Error", err);
+            console.error("Catalog Sync Error:", err);
+            console.error("Error details:", err.response?.data || err.message);
         }
     };
     initApp();
