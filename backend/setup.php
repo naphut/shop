@@ -1,3 +1,4 @@
+cat > setup.php << 'EOF'
 <?php
 // Database Setup Script
 echo "🗄️ Setting up Master Shirt Shop database...\n";
@@ -17,6 +18,9 @@ try {
             email VARCHAR(255) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
             role VARCHAR(10) DEFAULT 'user',
+            phone VARCHAR(50),
+            address TEXT,
+            status BOOLEAN DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )",
         
@@ -89,7 +93,13 @@ try {
     $adminPassword = password_hash('admin123', PASSWORD_BCRYPT);
     $stmt = $pdo->prepare("INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
     $stmt->execute(['System Admin', 'admin@master.com', $adminPassword, 'admin']);
-    echo "✅ Admin user created\n";
+    echo "✅ Admin user created (admin@master.com / admin123)\n";
+    
+    // Insert regular user
+    $userPassword = password_hash('user123', PASSWORD_BCRYPT);
+    $stmt = $pdo->prepare("INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+    $stmt->execute(['John Doe', 'user@example.com', $userPassword, 'user']);
+    echo "✅ Regular user created (user@example.com / user123)\n";
     
     // Insert sample products
     $products = [
@@ -120,20 +130,6 @@ try {
             'is_active' => 1,
             'is_best_seller' => 0,
             'is_new_arrival' => 1
-        ],
-        [
-            'name' => json_encode(['en' => 'Casual Shirt', 'kh' => 'អាវសម្រាប់ប្រចាងៃ']),
-            'description' => json_encode(['en' => 'Everyday casual shirt', 'kh' => 'អាវសម្រាប់ប្រចាងៃ']),
-            'price' => 29.99,
-            'typical_price' => 39.99,
-            'category_id' => 2,
-            'brand' => 'MasterBrand',
-            'stock' => 75,
-            'image_url' => 'https://via.placeholder.com/300',
-            'material' => 'Polyester',
-            'is_active' => 1,
-            'is_best_seller' => 0,
-            'is_new_arrival' => 0
         ]
     ];
     
@@ -157,11 +153,12 @@ try {
     
     echo "✅ Products inserted\n";
     echo "🎉 Database setup complete!\n";
-    echo "📊 Database: " . __DIR__ . "/database.sqlite\n";
+    echo "📊 Database location: " . __DIR__ . "/database.sqlite\n";
     echo "👤 Admin: admin@master.com / admin123\n";
+    echo "👤 User: user@example.com / user123\n";
     
 } catch (Exception $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
     exit(1);
 }
-?>
+EOF

@@ -12,10 +12,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://your-backend-url.com/$1"
+      "dest": "https://master-shirt-shop-backend.railway.app/$1"
     }
   ],
   "env": {
-    "VITE_API_URL": "https://your-backend-url.com"
+    "VITE_API_URL": "https://master-shirt-shop-backend.railway.app",
+    "GEMINI_API_KEY": "AIzaSyCU0lxbL9HUjvOW5_CeoMs9X-EOEFOSjrE"
   }
 }

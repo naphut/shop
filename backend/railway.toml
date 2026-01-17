@@ -1,0 +1,40 @@
+[build]
+  builder = "NIXPACKS"
+  buildCommand = "composer install --no-dev --optimize-autoloader"
+
+[deploy]
+  startCommand = "php -S 0.0.0.0:8001 -t ."
+  healthcheckPath = "/api/health"
+  healthcheckTimeout = 100
+  restartPolicyType = "ON_FAILURE"
+  sleepApplication = false
+
+[variables]
+  DB_HOST = "containers.railway.app"
+  DB_NAME = "railway"
+  DB_USER = "railway"
+  DB_PASS = "${{RAILWAY_PRIVATE_PASSWORD}}"
+  JWT_SECRET = "${{RAILWAY_PRIVATE_JWT_SECRET}}"
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  APP_URL = "${{RAILWAY_PUBLIC_URL}}"
+
+[[services]]
+  name = "web"
+  
+[services.web]
+  source = "."
+  
+[services.web.http]
+  internalPort = 8001
+  
+[services.web.http.checks]
+  [services.web.http.checks.ready]
+    path = "/api/health"
+    interval = "10s"
+    timeout = "5s"
+    
+  [services.web.http.checks.live]
+    path = "/api/health"
+    interval = "10s"
+    timeout = "5s"

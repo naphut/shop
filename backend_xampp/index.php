@@ -1,27 +1,9 @@
 <?php
-// CORS Headers
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit();
-}
-
-require_once 'config.php';
-require_once 'JWT.php';
+// Load XAMPP Configuration
+require_once 'xampp_config.php';
 
 // Database Connection
-try {
-    $db = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8", DB_USER, DB_PASS);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    http_response_code(500);
-    die(json_encode(["error" => "Database connection failed"]));
-}
+$db = getDB();
 
 // Enhanced Router Logic - Support both query param and path-based endpoints
 $method = $_SERVER['REQUEST_METHOD'];
@@ -228,6 +210,110 @@ try {
                 ]);
             } else {
                 sendError("Method not allowed", 405);
+            }
+            break;
+
+        // --- ADMIN DASHBOARD ---
+        case 'admin/dashboard':
+            $user = verifyAdmin();
+            $revenue = $db->query("SELECT SUM(total_amount) as total FROM orders WHERE status = 'completed'")->fetch();
+            $orders = $db->query("SELECT COUNT(*) as count FROM orders")->fetch();
+            $users = $db->query("SELECT COUNT(*) as count FROM users WHERE role = 'user'")->fetch();
+            
+            sendResponse([
+                "success" => true,
+                "data" => [
+                    "revenue" => (float)$revenue['total'],
+                    "orders" => (int)$orders['count'],
+                    "users" => (int)$users['count']
+                ]
+            ]);
+            break;
+
+        // --- ADMIN PRODUCTS ---
+        case 'admin/products':
+            $user = verifyAdmin();
+            if ($method === 'GET') {
+                $stmt = $db->query("
+                    SELECT p.*, c.name as category_name 
+                    FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id 
+                    ORDER BY p.created_at DESC
+                ");
+                $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                sendResponse([
+                    "success" => true,
+                    "data" => $products
+                ]);
+            } else if ($method === 'POST') {
+                $hash = password_hash($input['password'], PASSWORD_BCRYPT);
+                $stmt = $db->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'user')");
+                
+                try {
+                    $stmt->execute([$input['name'], $input['email'], $hash]);
+                    sendResponse([
+                        "success" => true,
+                        "message" => "Registration successful"
+                    ]);
+                } catch (Exception $e) {
+                    if (strpos($e->getMessage(), 'UNIQUE') !== false) {
+                        sendError("Email already exists", 409);
+                    } else {
+                        sendError("Registration failed", 500);
+                    }
+                }
+            } else if ($method === 'PUT') {
+                $stmt = $db->prepare("UPDATE products SET name = ?, description = ?, price = ?, category_id = ?, brand = ?, stock = ?, image_url = ?, material = ?, is_active = ?, is_best_seller = ?, is_new_arrival = ? WHERE id = ?");
+                $stmt->execute([
+                    $input['name'],
+                    $input['description'],
+                    $input['price'],
+                    $input['category_id'],
+                    $input['brand'],
+                    $input['stock'],
+                    $input['image_url'],
+                    $input['material'],
+                    $input['is_active'],
+                    $input['is_best_seller'],
+                    $input['is_new_arrival'],
+                    $input['id']
+                ]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Product updated successfully"
+                ]);
+            } else if ($method === 'DELETE') {
+                $stmt = $db->prepare("DELETE FROM products WHERE id = ?");
+                $stmt->execute([$input['id']]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Product deleted successfully"
+                ]);
+            }
+            break;
+
+        // --- ADMIN ORDERS ---
+        case 'admin/orders':
+            $user = verifyAdmin();
+            if ($method === 'GET') {
+                $stmt = $db->query("
+                    SELECT o.*, u.name as customer_name 
+                    FROM orders o 
+                    JOIN users u ON o.user_id = u.id 
+                    ORDER BY o.created_at DESC
+                ");
+                $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                sendResponse([
+                    "success" => true,
+                    "data" => $orders
+                ]);
+            } else if ($method === 'PUT') {
+                $stmt = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
+                $stmt->execute([$input['status'], $input['id']]);
+                sendResponse([
+                    "success" => true,
+                    "message" => "Order status updated successfully"
+                ]);
             }
             break;
 

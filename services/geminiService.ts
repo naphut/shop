@@ -3,11 +3,11 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { PRODUCTS } from "../constants";
 
 // Fix: Moving instantiation inside functions to comply with guidelines for using the most up-to-date API key.
-// const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function smartSearchProducts(query: string, lang: string) {
   // Fix: Create a new instance right before making an API call
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -37,7 +37,7 @@ export async function smartSearchProducts(query: string, lang: string) {
 
 export async function expandPrompt(basicIdea: string, lang: string) {
   // Fix: Create a new instance right before making an API call
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
@@ -67,7 +67,7 @@ export async function expandPrompt(basicIdea: string, lang: string) {
 
 export async function generateDesignImage(prompt: string) {
   // Fix: Create a new instance right before making an API call
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -99,7 +99,7 @@ export async function generateDesignImage(prompt: string) {
 
 export async function getProductRecommendation(cartItems: any[]) {
   // Fix: Create a new instance right before making an API call
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",

@@ -1,3 +1,4 @@
+cat > config.php << 'EOF'
 <?php
 // Load environment variables
 function loadEnv($path) {
@@ -17,27 +18,27 @@ function loadEnv($path) {
 
 loadEnv(__DIR__ . '/.env');
 
-// Database Configuration - SQLite
-define('DB_PATH', __DIR__ . '/database.sqlite');
-
 // Security Configuration
 define('JWT_SECRET', $_ENV['JWT_SECRET'] ?? 'MASTER_NODE_SECURE_99_ALPHA_V3');
 define('JWT_EXPIRY', $_ENV['JWT_EXPIRY'] ?? 86400);
 
-// Server Configuration
-define('APP_ENV', $_ENV['APP_ENV'] ?? 'development');
-define('APP_DEBUG', $_ENV['APP_DEBUG'] ?? 'true');
-define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost:8001');
-
-// Database Connection Function
+// For SQLite (we'll use SQLite for simplicity)
 function getDB() {
     try {
-        $pdo = new PDO('sqlite:' . DB_PATH);
+        $sqlitePath = __DIR__ . '/database.sqlite';
+        $pdo = new PDO('sqlite:' . $sqlitePath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec('PRAGMA foreign_keys = ON');
         return $pdo;
     } catch (PDOException $e) {
-        http_response_code(500);
-        die(json_encode(["error" => "Database Connection Failed"]));
+        error_log("Database connection error: " . $e->getMessage());
+        return null;
     }
 }
-?>
+
+// MySQL Configuration (if you want to switch later)
+define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
+define('DB_NAME', $_ENV['DB_NAME'] ?? 'master_shirt_shop');
+define('DB_USER', $_ENV['DB_USER'] ?? 'root');
+define('DB_PASS', $_ENV['DB_PASS'] ?? '');
+EOF

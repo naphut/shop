@@ -1,4 +1,3 @@
-cat > JWT.php << 'EOF'
 <?php
 class JWT {
     public static function encode($payload, $secret) {
@@ -27,8 +26,7 @@ class JWT {
 
         if ($base64UrlSignature !== $signatureProvided) return null;
 
-        $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $base64UrlPayload)), true);
-        return (object)$payload;
+        return json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $base64UrlPayload)));
     }
 }
-EOF
+?>

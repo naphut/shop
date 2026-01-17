@@ -35,9 +35,7 @@ define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost:8000');
 // Database Connection Function
 function getDB() {
     try {
-        // Use SQLite directly
-        $sqlitePath = __DIR__ . '/database.sqlite';
-        $pdo = new PDO('sqlite:' . $sqlitePath);
+        $pdo = new PDO("mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8", DB_USER, DB_PASS);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     } catch (PDOException $e) {

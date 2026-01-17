@@ -3,11 +3,11 @@
   command = "npm run build"
 
 [build.environment]
-  VITE_API_URL = "https://master-shirt-shop.netlify.app"
+  VITE_API_URL = "https://master-shirt-shop-backend.railway.app"
 
 [[redirects]]
   from = "/api/*"
-  to = "/api/:splat"
+  to = "https://master-shirt-shop-backend.railway.app/:splat"
   status = 200
 
 [[redirects]]
