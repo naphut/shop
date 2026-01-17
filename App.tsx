@@ -33,6 +33,8 @@ const App: React.FC = () => {
   const [currency, setCurrency] = useState<Currency>(Currency.USD);
   const [view, setView] = useState<ViewState>('home');
   const [heroVariant, setHeroVariant] = useState<HeroVariant>('luxury');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -64,50 +66,61 @@ const App: React.FC = () => {
   // --- Data Sync ---
   useEffect(() => {
     const initApp = async () => {
-        // 1. Sync User Session
-        const token = localStorage.getItem('ms-token');
-        if (token) {
-            try {
-                const res = await apiService.getMe();
-                setCurrentUser(res.data);
-                if (res.data.role === 'admin') setIsAdminLoggedIn(true);
-            } catch (err) {
-                localStorage.removeItem('ms-token');
-            }
-        }
-
-        // 2. Fetch Products
         try {
-            const res = await apiService.getProducts();
-            console.log('API Response:', res.data);
+            setLoading(true);
+            setError(null);
             
-            // Handle the response structure from backend
-            const productsData = res.data.data || res.data;
-            
-            // In a real DB, name_json is a string that needs parsing
-            const formatted = productsData.map((p: any) => {
+            // 1. Sync User Session
+            const token = localStorage.getItem('ms-token');
+            if (token) {
                 try {
-                    return {
-                        ...p,
-                        name: typeof p.name_json === 'string' ? JSON.parse(p.name_json) : p.name_json,
-                        description: typeof p.description_json === 'string' ? JSON.parse(p.description_json) : p.description_json,
-                        price: parseFloat(p.price)
-                    };
-                } catch (parseErr) {
-                    console.error('Error parsing product:', p.id, parseErr);
-                    return {
-                        ...p,
-                        name: { en: p.name || 'Product', kh: '' },
-                        description: { en: p.description || '', kh: '' },
-                        price: parseFloat(p.price) || 0
-                    };
+                    const res = await apiService.getMe();
+                    setCurrentUser(res.data);
+                    if (res.data.role === 'admin') setIsAdminLoggedIn(true);
+                } catch (err) {
+                    localStorage.removeItem('ms-token');
                 }
-            });
-            setProducts(formatted);
-            console.log('Products loaded successfully:', formatted.length);
+            }
+
+            // 2. Fetch Products
+            try {
+                const res = await apiService.getProducts();
+                console.log('API Response:', res.data);
+                
+                // Handle the response structure from backend
+                const productsData = res.data.data || res.data;
+                
+                // In a real DB, name_json is a string that needs parsing
+                const formatted = productsData.map((p: any) => {
+                    try {
+                        return {
+                            ...p,
+                            name: typeof p.name_json === 'string' ? JSON.parse(p.name_json) : p.name_json,
+                            description: typeof p.description_json === 'string' ? JSON.parse(p.description_json) : p.description_json,
+                            price: parseFloat(p.price)
+                        };
+                    } catch (parseErr) {
+                        console.error('Error parsing product:', p.id, parseErr);
+                        return {
+                            ...p,
+                            name: { en: p.name || 'Product', kh: '' },
+                            description: { en: p.description || '', kh: '' },
+                            price: parseFloat(p.price) || 0
+                        };
+                    }
+                });
+                setProducts(formatted);
+                console.log('Products loaded successfully:', formatted.length);
+            } catch (err) {
+                console.error("Catalog Sync Error:", err);
+                console.error("Error details:", err.response?.data || err.message);
+                setError("Failed to load products. Please try again.");
+            }
         } catch (err) {
-            console.error("Catalog Sync Error:", err);
-            console.error("Error details:", err.response?.data || err.message);
+            console.error("App initialization error:", err);
+            setError("Failed to initialize application.");
+        } finally {
+            setLoading(false);
         }
     };
     initApp();
@@ -171,6 +184,36 @@ const App: React.FC = () => {
     );
   } else if (isAdminMode && !isAdminLoggedIn) {
     return <AdminLoginView onLogin={(pass) => handleLogin({email: 'admin@master.com', password: pass})} onCancel={() => setIsAdminMode(false)} />;
+  }
+
+  // --- LOADING AND ERROR STATES ---
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Master Shirt Shop...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // --- USER ROUTING ---
