@@ -71,6 +71,11 @@ const App: React.FC = () => {
             setError(null);
             console.log('Starting app initialization...');
             
+            // Add timeout to prevent infinite loading
+            const timeoutPromise = new Promise<never>((_, reject) => {
+                setTimeout(() => reject(new Error('Initialization timeout')), 10000);
+            });
+            
             // 1. Sync User Session
             const token = localStorage.getItem('ms-token');
             if (token) {
@@ -86,10 +91,14 @@ const App: React.FC = () => {
                 }
             }
 
-            // 2. Fetch Products
+            // 2. Fetch Products with timeout
             try {
                 console.log('Fetching products...');
-                const res = await apiService.getProducts();
+                const res = await Promise.race([
+                    apiService.getProducts(),
+                    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('API timeout')), 5000)
+                ]);
+                
                 console.log('Products API response:', res);
                 
                 // Handle the response structure from backend
@@ -121,14 +130,16 @@ const App: React.FC = () => {
                 });
                 setProducts(formatted);
                 console.log('Products loaded successfully:', formatted.length);
+                
             } catch (err) {
                 console.error("Catalog Sync Error:", err);
                 console.error("Error details:", err.response?.data || err.message);
                 setError("Failed to load products. Please try again.");
             }
+            
         } catch (err) {
             console.error("App initialization error:", err);
-            setError("Failed to initialize application.");
+            setError(err.message || "Failed to initialize application.");
         } finally {
             setLoading(false);
             console.log('App initialization completed');

@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import SimpleApp from './simple-app';
+import App from './App';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <SimpleApp />
+      <App />
     </BrowserRouter>
   </React.StrictMode>
 );
