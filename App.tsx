@@ -97,7 +97,8 @@ const App: React.FC = () => {
                 const res = await Promise.race([
                     apiService.getProducts(),
                     new Promise<never>((_, reject) => setTimeout(() => reject(new Error('API timeout')), 5000)
-                ]);
+                ]
+                );
                 
                 console.log('Products API response:', res);
                 
