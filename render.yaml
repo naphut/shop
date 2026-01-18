@@ -1,0 +1,28 @@
+services:
+  # PHP Backend Service
+  - type: web
+    name: master-shirt-shop-backend
+    env: static
+    buildCommand: "echo 'No build needed for PHP'"
+    startCommand: "php -S 0.0.0.0:$PORT -t backend_neon"
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        value: ep-bitter-hill-ahicq02h-pooler.c-3.us-east-1.aws.neon.tech
+      - key: DB_NAME
+        value: neondb
+      - key: DB_USER
+        value: neondb_owner
+      - key: DB_PASS
+        value: npg_xUWu8qKeaSL4
+      - key: DB_PORT
+        value: 5432
+      - key: DB_SSL
+        value: require
+      - key: JWT_SECRET
+        value: your_super_secret_jwt_key_change_this_in_production
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false

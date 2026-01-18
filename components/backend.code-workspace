@@ -4,16 +4,7 @@
 			"path": "../backend"
 		},
 		{
-			"path": "../backend_mysql"
-		},
-		{
 			"path": "../backend_neon"
-		},
-		{
-			"path": "../backend_neon_rest"
-		},
-		{
-			"path": "../backend_xampp"
 		},
 		{
 			"path": "."
@@ -23,9 +14,6 @@
 		},
 		{
 			"path": "../dist"
-		},
-		{
-			"path": "../master-shirt-shop"
 		},
 		{
 			"path": "../node_modules"
